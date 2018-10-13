@@ -19,6 +19,7 @@ namespace RestBite.Controllers
         public ActionResult Index()
         {
             var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre);
+            var x = posts.ToList();
             return View(posts.ToList());
         }
 
@@ -284,18 +285,22 @@ namespace RestBite.Controllers
                          });
 
             // TODO: Nadav 
-            var BestGenrePost = query.ToList().GroupBy(x => x.GenreID).Select(n => new
+            var groupPosts = query.GroupBy(x => x.GenreID).ToList();
+
+            if (groupPosts.Count > 0)
             {
-                PostGenre = n.Key,
-                PostCount = n.Count()
+                var BestGenrePost = query.ToList().GroupBy(x => x.GenreID).Select(n => new
+                {
+                    PostGenre = n.Key,
+                    PostCount = n.Count()
+                }
+                )
+                .OrderByDescending(n => n.PostCount).First();
+                var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == BestGenrePost.PostGenre);
+                return View(posts);
             }
-            )
-            .OrderByDescending(n => n.PostCount).First();
 
-
-            var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == BestGenrePost.PostGenre);
-
-            return View(posts);
+            return (View(new List<Post>()));
         }
 
         protected override void Dispose(bool disposing)
