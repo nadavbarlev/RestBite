@@ -1,0 +1,64 @@
+﻿<script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AvGguM67cV4jQeIWEV2RA2LXZIifWDltAItjj95pY5RPgivBHmz1usJK_6MKnHUh' async defer></script>
+
+@{
+    ViewBag.Title = "Contact Us";
+}
+<h2>@ViewBag.Title</h2>
+
+<center>
+    <address>
+        Reshon lezion israel<br />
+        Redmond, WA 98321-2394<br />
+        <abbr title="Phone">P:</abbr>
+        052-7040802
+
+    </address>
+    <aside>
+        <b>You can catch us in are information stores around.</b><br />
+        <b>Check are stores on the map (;</b>
+    </aside>
+    <address>
+        <strong>Support:</strong>   <a href="mailto:Nadav@example.com">Nadav@example.com</a><br />
+        <strong>Marketing:</strong> <a href="mailto:Tomer@example.com">Tomer@example.com</a><br />
+        <strong>Marketing:</strong> <a href="mailto:ShuliPersonalTrainer@example.com">ShuliPersonalTrainer@example.com</a><br />
+    </address>
+
+    <div id="map" style='position:relative;width:600px;height:400px;'></div>
+
+</center>
+
+<script>
+    function getjson(url) {
+        var json = null;
+        $.ajax({
+            'async': false,
+            'global': false,
+            'url': url,
+            'dataType': "json",
+            'success': function (data) {
+                json = data;
+            }
+        });
+        return json;
+    } 
+
+    function GetMap() {
+
+        var markers = getjson('/markers/getjson');
+        console.log("1");
+        console.log(markers[0].lng);
+        var map = new Microsoft.Maps.Map('#map', {
+            credentials: 'AvGguM67cV4jQeIWEV2RA2LXZIifWDltAItjj95pY5RPgivBHmz1usJK_6MKnHUh',
+            center: new Microsoft.Maps.Location(markers[0].lat,markers[0].lng),
+            mapTypeId: Microsoft.Maps.MapTypeId.aerial,
+            zoom: 10
+        });
+
+        for (var i = 0; i < markers.length; i++) {
+            var marker = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(markers[i].lat, markers[i].lng), { text: markers[i].tag });
+            map.entities.push(marker)
+        }
+       
+    }
+
+</script>

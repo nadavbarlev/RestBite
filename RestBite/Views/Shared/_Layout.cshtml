@@ -1,0 +1,44 @@
+﻿@{
+    RestBite.Models.Client clnt = (RestBite.Models.Client)Session["Client"];
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/restStyle.css")
+    @Scripts.Render("~/bundles/modernizr")
+    <script src="~/Scripts/jquery-1.10.2.js"></script>
+
+</head>
+<body>
+    @Html.Partial("_NavBar")
+    <div class="container body-content">
+        @RenderBody() 
+
+        <center>
+            <div id="temperatureDiv">
+                <h4>Weather</h4>
+                <p>getting info...</p>
+            </div>
+        </center>
+
+        <!-- Weather service -->
+        <script src="~/Scripts/weather.js"></script>
+        <script src="https://query.yahooapis.com/v1/public/yql?q=select item, wind from weather.forecast where woeid in (select woeid from geo.places(1) where text='jerusalem, il') and u='c'&format=json&callback=weatherCallback"></script>
+        <hr />
+        <footer>
+            <center>
+                <p>&copy; @DateTime.Now.Year - RestBite </p>
+            </center>
+        </footer>
+    </div>
+    
+    @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>
