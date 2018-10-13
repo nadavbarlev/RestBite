@@ -8,6 +8,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using RestBite.Models;
+using Accord.MachineLearning.Bayes;
+
 
 namespace RestBite.Controllers
 {
@@ -269,8 +271,119 @@ namespace RestBite.Controllers
             return View(queryPosts.OrderByDescending(x => x.CreationDate));
         }
 
+        class DatasetRecommndedPosts
+        {
+            public int clientID;
+            public int generID;
+        }
+
         public ActionResult RecomendedPosts()
         {
+            // Query for DatasetRecommndedPosts
+            var query = (from u in db.Clients
+                         join post in db.Posts on u.ID equals post.ClientID
+                         select new DatasetRecommndedPosts
+                         { clientID = u.ID, generID = post.GenreID});
+
+            // Create dataset for learning
+            DatasetRecommndedPosts[] datasetRecommndedPosts = query.ToArray();
+
+            if (datasetRecommndedPosts.Length == 0)
+            {
+                return (View(new List<Post>()));
+            }
+
+            int numOfGener = db.Genres.ToList().Count;
+            int numOfClients = db.Clients.ToList().Count;
+
+            int[][] input = new int[datasetRecommndedPosts.Length][]; /* ClientID */
+            List<int> output = new List<int>();                       /* GenderID */
+
+            // Fill dataset
+            for (int i = 0; i < datasetRecommndedPosts.Length; i++)
+            {
+                input[i] = new int[] { datasetRecommndedPosts[i].clientID};
+                output.Add(datasetRecommndedPosts[i].generID);
+            }
+
+            var bayes = new NaiveBayes(numOfGener, new[] { numOfClients });
+            var learning = new NaiveBayesLearning()
+            {
+                Model = bayes
+            };
+
+            // Map for Consecutive numbers
+            Dictionary<int, int> inputMapper = new Dictionary<int, int>();
+            Dictionary<int, int> outputMapper = new Dictionary<int, int>();
+
+            int key = 0;
+            for (int index = 0; index < input.Length; index++)
+            {
+                if (!inputMapper.ContainsKey(input[index][0]))
+                {
+                    inputMapper.Add(input[index][0], key);
+                    input[index][0] = key;
+                    key++;
+                }
+                else
+                {
+                    input[index][0] = inputMapper[input[index][0]];
+                }
+            }
+
+            key = 0;
+            for (int index = 0; index < output.Count; index++)
+            {
+                if (!outputMapper.ContainsKey(output[index]))
+                {
+                    outputMapper.Add(output[index], key);
+                    output[index] = key;
+                    key++;
+                }
+                else
+                {
+                    output[index] = outputMapper[output[index]];
+                }
+            }
+
+
+            learning.Learn(input, output.ToArray());
+
+            int currentClientID = ((Client)Session["Client"]).ID;
+            if (!inputMapper.ContainsKey(currentClientID))
+            {
+                return View(new List<Post>());
+            }
+            int answerGenderID = bayes.Decide(new int[] { inputMapper[currentClientID] });
+            int mapAnswerGenderID = 0;
+            foreach (var n in outputMapper)
+            {
+                if (n.Value == answerGenderID)
+                {
+                    mapAnswerGenderID = n.Key;
+                }
+            }
+            var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == (mapAnswerGenderID));
+            return (View(posts));
+
+            /*
+            int[][] inputs =
+            {
+                //      input     output
+                new [] { 0, 1 }, //  0 
+                new [] { 0, 2 }, //  0
+                new [] { 0, 1 }, //  0
+                new [] { 1, 2 }, //  1
+                new [] { 0, 2 }, //  1
+                new [] { 0, 2 }, //  1
+                new [] { 1, 1 }, //  2
+                new [] { 0, 1 }, //  2
+                new [] { 1, 1 }, //  2
+            };
+
+            int
+
+
             // join select for users and their posts
             var query = (from u in db.Clients
                          join post in db.Posts on u.ID equals post.ClientID
@@ -283,6 +396,8 @@ namespace RestBite.Controllers
                              ID = u.ID,
                              GenreID = post.GenreID
                          });
+
+            
 
             // TODO: Nadav 
             var groupPosts = query.GroupBy(x => x.GenreID).ToList();
@@ -301,8 +416,9 @@ namespace RestBite.Controllers
             }
 
             return (View(new List<Post>()));
+            */
         }
-
+        
         protected override void Dispose(bool disposing)
         {
             if (disposing)
