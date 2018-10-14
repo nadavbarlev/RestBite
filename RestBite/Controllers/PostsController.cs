@@ -223,8 +223,11 @@ namespace RestBite.Controllers
                     CreationDate = DateTime.Now
                 };
 
-                db.Comments.Add(comment);
-                db.SaveChanges();
+                if (content != string.Empty)
+                {
+                    db.Comments.Add(comment);
+                    db.SaveChanges();
+                }
 
                 return RedirectToAction("Index");
             }
