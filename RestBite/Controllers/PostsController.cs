@@ -21,7 +21,6 @@ namespace RestBite.Controllers
         public ActionResult Index()
         {
             var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre);
-            var x = posts.ToList();
             return View(posts.ToList());
         }
 
@@ -287,44 +286,45 @@ namespace RestBite.Controllers
                          join post in db.Posts on u.ID equals post.ClientID
                          select new DatasetRecommndedPosts
                          { clientID = u.ID, generID = post.GenreID});
-
-            // Create dataset for learning
             DatasetRecommndedPosts[] datasetRecommndedPosts = query.ToArray();
 
+            // No Posts yet
             if (datasetRecommndedPosts.Length == 0)
             {
                 return (View(new List<Post>()));
             }
 
+            // One Post
             if (datasetRecommndedPosts.Length == 1)
             {
-                var post = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == (datasetRecommndedPosts[0].generID));
+                var post = db.Posts.Include(p => p.Client)
+                                   .Include(p => p.Genre)
+                                   .Where(p => p.GenreID == (datasetRecommndedPosts[0].generID));
                 return (View(post));
             }
 
+            // More then One post
             int numOfGener = db.Genres.ToList().Count;
             int numOfClients = db.Clients.ToList().Count;
 
+            // Create and fill the dataset
             int[][] input = new int[datasetRecommndedPosts.Length][]; /* ClientID */
             List<int> output = new List<int>();                       /* GenderID */
-
-            // Fill dataset
             for (int i = 0; i < datasetRecommndedPosts.Length; i++)
             {
                 input[i] = new int[] { datasetRecommndedPosts[i].clientID};
                 output.Add(datasetRecommndedPosts[i].generID);
             }
 
+            // Use Naive Bayes for learning
             var bayes = new NaiveBayes(numOfGener, new[] { numOfClients });
-            var learning = new NaiveBayesLearning()
-            {
-                Model = bayes
-            };
+            var learning = new NaiveBayesLearning() { Model = bayes };
 
-            // Map for Consecutive numbers
+            // Mapper for Consecutive numbers - Naive bayes expect to receive consecutive data starts from 0
             Dictionary<int, int> inputMapper = new Dictionary<int, int>();
             Dictionary<int, int> outputMapper = new Dictionary<int, int>();
 
+            // Create mapper for input data
             int key = 0;
             for (int index = 0; index < input.Length; index++)
             {
@@ -340,6 +340,7 @@ namespace RestBite.Controllers
                 }
             }
 
+            // Create mapper for output data
             key = 0;
             for (int index = 0; index < output.Count; index++)
             {
@@ -355,15 +356,18 @@ namespace RestBite.Controllers
                 }
             }
 
-
-            learning.Learn(input, output.ToArray());
-
+            // If there is no posts for this user
             int currentClientID = ((Client)Session["Client"]).ID;
             if (!inputMapper.ContainsKey(currentClientID))
             {
                 return View(new List<Post>());
             }
+
+            // Naive bayes learning and decide
+            learning.Learn(input, output.ToArray());
             int answerGenderID = bayes.Decide(new int[] { inputMapper[currentClientID] });
+
+            // Gets the real GenderID by mapper
             int mapAnswerGenderID = 0;
             foreach (var n in outputMapper)
             {
@@ -372,6 +376,8 @@ namespace RestBite.Controllers
                     mapAnswerGenderID = n.Key;
                 }
             }
+
+            // Gets the posts with recommended genderID
             var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == (mapAnswerGenderID));
             return (View(posts));
 

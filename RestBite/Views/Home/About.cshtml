@@ -1,8 +1,8 @@
 ﻿<center>
     <h2>@ViewBag.Title</h2>
     <h3>@ViewBag.Message</h3>
-    <p>Group of people that loves good food.</p>
-        <canvas id="canvas" width="578" height="400" />
+    <p>Group of people that loves good food.</p> <br/> <br/>
+    <canvas id="canvas" width="578" height="400" />
 </center>
     <script>
         var canvas = document.getElementById('canvas');
@@ -10,7 +10,7 @@
         var imageObj = new Image();
 
         imageObj.onload = function () {
-            context.drawImage(imageObj, 0, 0);
+            context.drawImage(imageObj,0,0);
         };
         imageObj.src = 'https://torrecatalunya.expohotels.com/wp-content/uploads/2014/12/Visual-Eje-__H81.jpg';
-    </script>
+</script>
