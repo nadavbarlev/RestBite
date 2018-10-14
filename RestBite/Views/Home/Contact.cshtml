@@ -5,15 +5,15 @@
 @{
     ViewBag.Title = "Contact Us";
 }
-<h2>@ViewBag.Title</h2>
+
 
 <center>
+    <h2>@ViewBag.Title</h2>
     <address>
         Reshon lezion israel<br />
         Redmond, WA 98321-2394<br />
         <abbr title="Phone">P:</abbr>
         052-7040802
-
     </address>
     <aside>
         <b>You can catch us in are information stores around.</b><br />
@@ -28,10 +28,8 @@
     <div id="map" style='position:relative;width:600px;height:400px;'></div>
     @if (clnt != null && clnt.isAdmin)
     {
-        <a href="/markers">Edit Markers</a>
+        <a href="/markers">Edit Markers</a> <br/>
     }
-
-
 </center>
 
 <script>
@@ -50,10 +48,7 @@
     }
 
     function GetMap() {
-
         var markers = getjson('/markers/getjson');
-        console.log("1");
-        console.log(markers[0].lng);
         var map = new Microsoft.Maps.Map('#map', {
             credentials: 'AvGguM67cV4jQeIWEV2RA2LXZIifWDltAItjj95pY5RPgivBHmz1usJK_6MKnHUh',
             center: new Microsoft.Maps.Location(markers[0].lat, markers[0].lng),
@@ -65,7 +60,6 @@
             var marker = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(markers[i].lat, markers[i].lng), { text: markers[i].tag });
             map.entities.push(marker)
         }
-
     }
 
 </script>
