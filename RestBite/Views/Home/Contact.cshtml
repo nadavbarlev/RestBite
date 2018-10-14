@@ -1,5 +1,7 @@
 ﻿<script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AvGguM67cV4jQeIWEV2RA2LXZIifWDltAItjj95pY5RPgivBHmz1usJK_6MKnHUh' async defer></script>
-
+@{
+    RestBite.Models.Client clnt = (RestBite.Models.Client)Session["Client"];
+}
 @{
     ViewBag.Title = "Contact Us";
 }
@@ -24,6 +26,11 @@
     </address>
 
     <div id="map" style='position:relative;width:600px;height:400px;'></div>
+    @if (clnt != null && clnt.isAdmin)
+    {
+        <a href="/markers">Edit Markers</a>
+    }
+
 
 </center>
 
@@ -40,7 +47,7 @@
             }
         });
         return json;
-    } 
+    }
 
     function GetMap() {
 
@@ -49,7 +56,7 @@
         console.log(markers[0].lng);
         var map = new Microsoft.Maps.Map('#map', {
             credentials: 'AvGguM67cV4jQeIWEV2RA2LXZIifWDltAItjj95pY5RPgivBHmz1usJK_6MKnHUh',
-            center: new Microsoft.Maps.Location(markers[0].lat,markers[0].lng),
+            center: new Microsoft.Maps.Location(markers[0].lat, markers[0].lng),
             mapTypeId: Microsoft.Maps.MapTypeId.aerial,
             zoom: 10
         });
@@ -58,7 +65,7 @@
             var marker = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(markers[i].lat, markers[i].lng), { text: markers[i].tag });
             map.entities.push(marker)
         }
-       
+
     }
 
 </script>

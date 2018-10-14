@@ -293,6 +293,12 @@ namespace RestBite.Controllers
                 return (View(new List<Post>()));
             }
 
+            if (datasetRecommndedPosts.Length == 1)
+            {
+                var post = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == (datasetRecommndedPosts[0].generID));
+                return (View(post));
+            }
+
             int numOfGener = db.Genres.ToList().Count;
             int numOfClients = db.Clients.ToList().Count;
 
@@ -322,7 +328,7 @@ namespace RestBite.Controllers
                 if (!inputMapper.ContainsKey(input[index][0]))
                 {
                     inputMapper.Add(input[index][0], key);
-                    input[index][0] = key;
+                    input[index][0] = key; 
                     key++;
                 }
                 else
@@ -366,57 +372,6 @@ namespace RestBite.Controllers
             var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == (mapAnswerGenderID));
             return (View(posts));
 
-            /*
-            int[][] inputs =
-            {
-                //      input     output
-                new [] { 0, 1 }, //  0 
-                new [] { 0, 2 }, //  0
-                new [] { 0, 1 }, //  0
-                new [] { 1, 2 }, //  1
-                new [] { 0, 2 }, //  1
-                new [] { 0, 2 }, //  1
-                new [] { 1, 1 }, //  2
-                new [] { 0, 1 }, //  2
-                new [] { 1, 1 }, //  2
-            };
-
-            int
-
-
-            // join select for users and their posts
-            var query = (from u in db.Clients
-                         join post in db.Posts on u.ID equals post.ClientID
-                         select new userPostsViewModel
-                         {
-                             UserName = u.ClientName,
-                             FirstName = u.FirstName,
-                             LastName = u.LastName,
-                             Title = post.Title,
-                             ID = u.ID,
-                             GenreID = post.GenreID
-                         });
-
-            
-
-            // TODO: Nadav 
-            var groupPosts = query.GroupBy(x => x.GenreID).ToList();
-
-            if (groupPosts.Count > 0)
-            {
-                var BestGenrePost = query.ToList().GroupBy(x => x.GenreID).Select(n => new
-                {
-                    PostGenre = n.Key,
-                    PostCount = n.Count()
-                }
-                )
-                .OrderByDescending(n => n.PostCount).First();
-                var posts = db.Posts.Include(p => p.Client).Include(p => p.Genre).Where(p => p.GenreID == BestGenrePost.PostGenre);
-                return View(posts);
-            }
-
-            return (View(new List<Post>()));
-            */
         }
         
         protected override void Dispose(bool disposing)
