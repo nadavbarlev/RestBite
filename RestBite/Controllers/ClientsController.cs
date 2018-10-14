@@ -237,15 +237,15 @@ namespace RestBite.Controllers
         public ActionResult Stats()
         {
             // join select for users and their posts
-            var query = (from u in db.Clients
-                         join post in db.Posts on u.ID equals post.ClientID
+            var query = (from client in db.Clients
+                         join post in db.Posts on client.ID equals post.ClientID
                          select new userPostsViewModel
                          {
-                             UserName = u.ClientName,
-                             FirstName = u.FirstName,
-                             LastName = u.LastName,
+                             UserName = client.ClientName,
+                             FirstName = client.FirstName,
+                             LastName = client.LastName,
                              Title = post.Title,
-                             ID = u.ID
+                             ID = client.ID
                          });
             var data = query.ToList();
             return View(data);
