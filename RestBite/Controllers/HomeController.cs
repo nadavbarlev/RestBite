@@ -15,7 +15,7 @@ namespace RestBite.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
+            ViewBag.Message = "About RestBite!";
 
             return View();
         }
