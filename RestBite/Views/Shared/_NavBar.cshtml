@@ -16,7 +16,7 @@
             <ul class="nav navbar-nav">
                 <li>@Html.ActionLink("Home", "Index", "Home")</li>
                 <li>@Html.ActionLink("Posts", "Index", "Posts")</li>
-                @if (clnt != null && !clnt.isAdmin)
+                @if (clnt != null)
                 {
                     <li>@Html.ActionLink("Recommended Posts", "RecomendedPosts", "Posts")</li>
                 }

@@ -201,7 +201,8 @@ namespace RestBite.Controllers
 
                 // Get the posts of the user
                 lstPosts = db.Posts.Where(x => x.ClientID == id).ToList();
-
+                
+                // Delete user posts
                 foreach (Post currPost in lstPosts)
                 {
                     List<Comment> lstComments = new List<Comment>();
@@ -213,6 +214,24 @@ namespace RestBite.Controllers
                     }
 
                     db.Posts.Remove(currPost);
+                }
+
+                // Delete user comments
+                lstPosts = db.Posts.ToList();
+                foreach(Post currPost in lstPosts)
+                {
+                    if (currPost.Comments != null)
+                    { 
+                        List<Comment> lstCommentsOfCurrPost = currPost.Comments.ToList();
+
+                        foreach (Comment currComment in lstCommentsOfCurrPost)
+                        {
+                            if (currComment.ClientID == id)
+                            {
+                                db.Comments.Remove(currComment);        
+                            }
+                        }
+                    }
                 }
 
                 db.Clients.Remove(client);
